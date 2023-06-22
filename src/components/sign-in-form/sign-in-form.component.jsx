@@ -1,22 +1,26 @@
 import { useState } from "react";
-import "./sign-up-form.styles.scss";
+import "./sign-in-form.styles.scss";
 import {
   createAuthUserWithEmailPassword,
   createUserDocumentFromAuth,
+  signInAuthUserWithEmailPassword,
+  signInWithGooglePopup,
 } from "../../utils/firebase/firebase.utils";
 import FormInput from "../form-input/form-input.component";
 import Button from "../button/button.component";
 
 const defaulFormFields = {
-  displayName: "",
   email: "",
   password: "",
-  confirmPassword: "",
 };
 
-const SignUpForm = () => {
+const SignInForm = () => {
   const [formFields, setFormFields] = useState(defaulFormFields);
-  const { displayName, email, password, confirmPassword } = formFields;
+  const { email, password } = formFields;
+  const signInWithGoogle = async () => {
+    const { user } = await signInWithGooglePopup();
+    const userDocRef = await createUserDocumentFromAuth(user);
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -29,39 +33,31 @@ const SignUpForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords don't match");
-      return;
-    }
+
     try {
-      const { user } = await createAuthUserWithEmailPassword(email, password);
-      await createUserDocumentFromAuth(user, {
-        displayName,
-      });
+      const { user } = await signInAuthUserWithEmailPassword(email, password);
+      if (user) {
+        console.log(user);
+      }
       resetForm();
-      //   console.log(userDocRef);
     } catch (error) {
-      if (error.code === "auth/email-already-in-use") {
-        alert("Email already in use");
-      } else {
-        console.log(error);
+      switch(error.code){
+        case "auth/user-not-found":
+          alert("User not found");
+          break;
+        case "auth/wrong-password":
+          alert("Wrong password");
+          break;
+        default:
+          console.log(error);
       }
     }
   };
   return (
     <div className="sign-up-container">
-    <h2>Don't have an account?</h2>
-      <span>Sign Up with your email and password</span>
-      
+      <h2>Already have an account?</h2>
+      <span>Sign In with your email and password</span>
       <form onSubmit={handleSubmit}>
-        <FormInput
-          label="Display Name"
-          type="text"
-          name="displayName"
-          onChange={handleChange}
-          value={displayName}
-          required
-        />
         <FormInput
           label="Email"
           type="email"
@@ -78,18 +74,17 @@ const SignUpForm = () => {
           value={password}
           required
         />
-        <FormInput
-          label="Confirm Password"
-          type="password"
-          name="confirmPassword"
-          onChange={handleChange}
-          value={confirmPassword}
-          required
-        />
-        <Button buttonType='inverted' type="submit">Sign Up</Button>
+        <div className="buttons-container">
+          <Button buttonType="inverted" type="submit">
+            Sign In
+          </Button>
+          <Button type="button" buttonType="google" onClick={signInWithGoogle}>
+            Google Sign In
+          </Button>
+        </div>
       </form>
     </div>
   );
 };
 
-export default SignUpForm;
+export default SignInForm;
