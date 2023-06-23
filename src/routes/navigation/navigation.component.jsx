@@ -5,12 +5,17 @@ import "./navigation.styles.scss";
 import { useContext } from "react";
 import { UserContext } from "../../contexts/user.context";
 import { signOutAuthUser } from "../../utils/firebase/firebase.utils";
+import CategoryItem from "../../components/category-item/category-item.component";
+import CartIcon from "../../components/cart-icon/cart-icon.component";
+import CartDropdown from "../../components/cart-dropdown/cart-dropdown.component";
+import { CartContext } from "../../contexts/cart.context";
 const Navigation = () => {
   const { currentUser } = useContext(UserContext);
   // const signOutHandler = async() => {
   //   await signOutAuthUser();
   //   setCurrentUser(null)
   // };
+  const { isCartOpen} = useContext(CartContext)
   console.log(currentUser);
   return (
     <Fragment>
@@ -32,7 +37,12 @@ const Navigation = () => {
               SIGN IN
             </Link>
           )}
+          <CartIcon/>
         </div>
+        {
+          isCartOpen && <CartDropdown/>
+        }
+       
       </div>
       <Outlet />
     </Fragment>
