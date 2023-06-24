@@ -6,7 +6,7 @@ import "./product-card.styles.scss";
 const ProductCard = ({ product }) => {
 
     const {name,price,imageUrl} = product;
-    console.log(product)
+    // console.log(product)
     const {addItemToCart} = useContext(CartContext)
     const addProductToCart = () => addItemToCart(product)
     return(
